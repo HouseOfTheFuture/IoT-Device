@@ -10,19 +10,32 @@ namespace HouseOfTheFuture.IotHub.Tester
 {
     class Program
     {
-        public static int GroupPort { get; private set; }
 
         static void Main(string[] args)
         {
-            var udp = new UdpClient();
-            var groupEP = new IPEndPoint(IPAddress.Broadcast, GroupPort);
-
             var str4 = "Smart";
+            var sendBytes4 = new byte[1024];
 
-            var sendBytes4 = Encoding.ASCII.GetBytes(str4);
+            //var udpBroadcast = new System.Net.Sockets.UdpClient(11001); // local binding
+            //udpBroadcast.Connect(IPAddress.Broadcast, 11000);
+            //udpBroadcast.Send(sendBytes4, sendBytes4.Length);
+            //udpBroadcast.Close();
 
-            udp.Send(sendBytes4, sendBytes4.Length, groupEP);
-            byte[] receiveBytes = udp.Receive(ref groupEP);
+            Console.ReadLine();
+
+            var asyncshit = new SocketAsyncEventArgs();
+            asyncshit.RemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, 51249);
+            asyncshit.Completed += (sender, eventArgs) =>
+            {
+                Console.WriteLine("PALJAS");
+            };
+
+            asyncshit.SetBuffer(sendBytes4, 0, sendBytes4.GetLength(0));
+
+            var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            s.SendToAsync(asyncshit);
+
+            Console.ReadLine();
         }
     }
 }
