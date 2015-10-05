@@ -64,7 +64,7 @@ namespace HouseOfTheFuture.IoTHub
             var socket = new DatagramSocket();
             socket.MessageReceived += Socket_MessageReceived;
             await socket.BindServiceNameAsync("5321");
-            socket.JoinMulticastGroup(new HostName("255.255.255.255"));
+            // TODO: Multicast: socket.JoinMulticastGroup(new HostName("255.255.255.255"));
             Log(string.Format("Listening on {0}:{1}", hostname.DisplayName, 5321));
             
         }
@@ -95,7 +95,6 @@ namespace HouseOfTheFuture.IoTHub
             using (var socket = new DatagramSocket())
             {
                 await socket.ConnectAsync(new HostName(hostname), "5321");
-                // TODO: Multicast: socket.JoinMulticastGroup(new HostName(hostname));
                 var stream = socket.OutputStream;
 
                 var writer = new DataWriter(stream);
