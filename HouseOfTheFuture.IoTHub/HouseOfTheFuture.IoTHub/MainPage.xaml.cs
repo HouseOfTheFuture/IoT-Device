@@ -95,6 +95,7 @@ namespace HouseOfTheFuture.IoTHub
             using (var socket = new DatagramSocket())
             {
                 await socket.ConnectAsync(new HostName(hostname), "5321");
+                // TODO: Multicast: socket.JoinMulticastGroup(new HostName(hostname));
                 var stream = socket.OutputStream;
 
                 var writer = new DataWriter(stream);
