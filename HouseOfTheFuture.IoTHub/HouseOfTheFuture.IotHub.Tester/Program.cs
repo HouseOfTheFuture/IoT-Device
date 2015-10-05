@@ -24,7 +24,7 @@ namespace HouseOfTheFuture.IotHub.Tester
             Console.ReadLine();
 
             var asyncshit = new SocketAsyncEventArgs();
-            asyncshit.RemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, 51249);
+            asyncshit.RemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, 11000);
             asyncshit.Completed += (sender, eventArgs) =>
             {
                 Console.WriteLine("PALJAS");

@@ -1,14 +1,21 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
 using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -28,8 +35,6 @@ namespace HouseOfTheFuture.IoTHub
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private Socket _s;
-
         public MainPage()
         {
             InitializeComponent();
@@ -37,56 +42,45 @@ namespace HouseOfTheFuture.IoTHub
 
         private void MainPage_OnLoaded(object sender, RoutedEventArgs e)
         {
-            object token = new object();
-            var socketAsyncEventArgs = new SocketAsyncEventArgs
+            using (NetworkInterface ni = new NetworkInterface())
             {
-                RemoteEndPoint = new IPEndPoint(IPAddress.Parse("192.168.100.53"), 51249)
-            };
-            socketAsyncEventArgs.SetBuffer(new byte[1024], 0, 1024);
-            socketAsyncEventArgs.Completed += (kut, args) =>
-            {
-                if (args.SocketError == SocketError.Success)
-                {
-                    var dataDash = args.Buffer;
-                    var textReceived = Encoding.ASCII.GetString(dataDash);
+                Debug.WriteLine("Clicked!");
+                ni.Connect(new HostName("255.255.255.255"), "5321");
+                string cmd = "Hello there\r";
 
-                    Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        kakBox.Text = textReceived;
-                    });
+                ni.SendMessage(cmd);
+            }
+        }
+    }
+    class NetworkInterface : IDisposable
+    {
+        private readonly DatagramSocket _socket;
 
-                }
-                else
-                {
+        public NetworkInterface()
+        {
+            _socket = new DatagramSocket();
+        }
 
-                    Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        kakBox.Text = "Werkt niet :( Maar wel completed  gehit :o";
-                    });
+        public async void Connect(HostName remoteHostName, string remoteServiceNameOrPort)
+        {
+            await _socket.ConnectAsync(remoteHostName, remoteServiceNameOrPort);
+        }
 
-                }
+        public async void SendMessage(string message)
+        {
+            var stream = _socket.OutputStream;
 
-            };
+            var writer = new DataWriter(stream);
 
+            writer.WriteString(message);
 
-            var datagram = new DatagramSocket();
-            datagram.
+            await writer.StoreAsync();
+        }
 
-            _s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            var result = _s.ReceiveFromAsync(socketAsyncEventArgs);
-
-            var data = socketAsyncEventArgs.Buffer;
-
-            var text = Encoding.ASCII.GetString(data);
-
-            System.Diagnostics.Debug.WriteLine(result);
-
-            kakBox.Text = "Receive : " + result;
+        public void Dispose()
+        {
+            _socket.Dispose();
         }
     }
 
-    class Jos : SocketAsyncEventArgs
-    {
-        
-    }
 }
