@@ -10,32 +10,31 @@ namespace HouseOfTheFuture.IotHub.Tester
 {
     class Program
     {
+        public static int GroupPort { get; private set; }
 
         static void Main(string[] args)
         {
+            GroupPort = 5321;
+
+            var udp = new UdpClient();
+            var groupEP = new IPEndPoint(IPAddress.Any, GroupPort);
+
             var str4 = "Smart";
-            var sendBytes4 = new byte[1024];
 
-            //var udpBroadcast = new System.Net.Sockets.UdpClient(11001); // local binding
-            //udpBroadcast.Connect(IPAddress.Broadcast, 11000);
-            //udpBroadcast.Send(sendBytes4, sendBytes4.Length);
-            //udpBroadcast.Close();
+            //var sendBytes4 = Encoding.ASCII.GetBytes(str4);
 
-            Console.ReadLine();
+            //udp.Send(sendBytes4, sendBytes4.Length, groupEP);
+            udp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            udp.ExclusiveAddressUse = false;
+            udp.Client.Bind(groupEP);
+            udp.BeginReceive(new AsyncCallback(re), null);
 
-            var asyncshit = new SocketAsyncEventArgs();
-            asyncshit.RemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, 11000);
-            asyncshit.Completed += (sender, eventArgs) =>
-            {
-                Console.WriteLine("PALJAS");
-            };
+            Console.Read();
+        }
 
-            asyncshit.SetBuffer(sendBytes4, 0, sendBytes4.GetLength(0));
-
-            var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            s.SendToAsync(asyncshit);
-
-            Console.ReadLine();
+        private static void re(IAsyncResult ar)
+        {
+            throw new NotImplementedException();
         }
     }
 }
