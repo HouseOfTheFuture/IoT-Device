@@ -35,9 +35,12 @@ namespace HouseOfTheFuture.IoTHub
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private StringBuilder _log;
+
         public MainPage()
         {
             InitializeComponent();
+            _log = new StringBuilder();
         }
 
         private void MainPage_OnLoaded(object sender, RoutedEventArgs e)
@@ -58,39 +61,40 @@ namespace HouseOfTheFuture.IoTHub
 
         private async Task ListenForTick(HostName hostname)
         {
-            using (var socket = new DatagramSocket())
+            var socket = new DatagramSocket();
+            socket.MessageReceived += Socket_MessageReceived;
+            await socket.BindServiceNameAsync("5321");
+            socket.JoinMulticastGroup(new HostName("255.255.255.255"));
+            Log(string.Format("Listening on {0}:{1}", hostname.DisplayName, 5321));
+            
+        }
+
+        private async Task Log(string format)
+        {
+            if (Dispatcher.HasThreadAccess)
             {
-                socket.MessageReceived += Socket_MessageReceived;
-                await socket.BindServiceNameAsync("5321", hostname.IPInformation.NetworkAdapter);
-                Debug.WriteLine("CONNECTED");
-                await socket.ConnectAsync(new HostName("255.255.255.255"), "5321");
-                var stream = socket.OutputStream;
-
-
-                var writer = new DataWriter(stream);
-
-                writer.WriteString("TICK");
-
-                await writer.StoreAsync();
+                _log.AppendLine(string.Format("{0} - {1}", DateTime.Now, format));
+                textBlock.Text = _log.ToString();
+            }
+            else
+            {
+                await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    Log(format);
+                });
             }
         }
 
         private void Socket_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
         {
-            var stream = sender.OutputStream;
-
-            var writer = new DataWriter(stream);
-
-            writer.WriteString("TACK");
-
-            writer.StoreAsync();
+            Log(string.Format("TICK Received FROM {0}", args.RemoteAddress.DisplayName));
         }
 
-        private async Task SendTack()
+        private async Task SendTack(string hostname)
         {
             using (var socket = new DatagramSocket())
             {
-                await socket.ConnectAsync(new HostName("255.255.255.255"), "5321");
+                await socket.ConnectAsync(new HostName(hostname), "5321");
                 var stream = socket.OutputStream;
 
                 var writer = new DataWriter(stream);
@@ -98,12 +102,14 @@ namespace HouseOfTheFuture.IoTHub
                 writer.WriteString("TACK");
 
                 await writer.StoreAsync();
+
+                Log(string.Format("TACK Broadcasted to {0}:5321", hostname));
             }
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            SendTack();
+            SendTack("255.255.255.255");
         }
     }
     class NetworkInterface
