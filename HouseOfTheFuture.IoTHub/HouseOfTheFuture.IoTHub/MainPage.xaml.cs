@@ -35,7 +35,10 @@ namespace HouseOfTheFuture.IoTHub
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private const string MulticastAddress = "239.255.42.99";
+        private const string RemoteServiceName = "5321";
         private StringBuilder _log;
+        private HostName[] _adapters;
 
         public MainPage()
         {
@@ -45,17 +48,13 @@ namespace HouseOfTheFuture.IoTHub
 
         private void MainPage_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ListenOnAllIps();
-        }
-
-        private async Task ListenOnAllIps()
-        {
-            foreach (var hostname in NetworkInformation.GetHostNames()
+            _adapters = NetworkInformation.GetHostNames()
                 .Where(x => x.IPInformation != null
                             && (x.IPInformation.NetworkAdapter.IanaInterfaceType == 71 // wifi
-                                || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6) && x.Type == HostNameType.Ipv4)) // ethernet
+                                || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6) && x.Type == HostNameType.Ipv4).ToArray(); // ethernet
+            foreach (var hostName in _adapters)
             {
-                ListenForTick(hostname);
+                ListenForTick(hostName);
             }
         }
 
@@ -63,9 +62,9 @@ namespace HouseOfTheFuture.IoTHub
         {
             var socket = new DatagramSocket();
             socket.MessageReceived += Socket_MessageReceived;
-            await socket.BindServiceNameAsync("5321");
-            // TODO: Multicast: socket.JoinMulticastGroup(new HostName("255.255.255.255"));
-            Log(string.Format("Listening on {0}:{1}", hostname.DisplayName, 5321));
+            await socket.BindServiceNameAsync(RemoteServiceName, hostname.IPInformation.NetworkAdapter);
+            socket.JoinMulticastGroup(new HostName(MulticastAddress));
+            Log(string.Format("Listening on {0}:{1}", hostname.DisplayName, RemoteServiceName));
             
         }
 
@@ -90,28 +89,31 @@ namespace HouseOfTheFuture.IoTHub
             Log(string.Format("TICK Received FROM {0}", args.RemoteAddress.DisplayName));
         }
 
-        private async Task SendTack(string hostname)
+        private async Task SendTack()
         {
-            using (var socket = new DatagramSocket())
+            foreach (var hostName in _adapters)
             {
-                await socket.ConnectAsync(new HostName(hostname), "5321");
-                var stream = socket.OutputStream;
+                using (var socket = new DatagramSocket())
+                {
+                    await socket.BindServiceNameAsync("", hostName.IPInformation.NetworkAdapter);
+                    socket.JoinMulticastGroup(new HostName(MulticastAddress));
+                    IOutputStream outputStream = await socket.GetOutputStreamAsync(new HostName(MulticastAddress), RemoteServiceName);
+                    byte[] buffer = Encoding.UTF8.GetBytes("Protocol message");
+                    await outputStream.WriteAsync(buffer.AsBuffer());
+                    await outputStream.FlushAsync();
 
-                var writer = new DataWriter(stream);
-
-                writer.WriteString("TACK");
-
-                await writer.StoreAsync();
-
-                Log(string.Format("TACK Broadcasted to {0}:5321", hostname));
+                    Log(string.Format("TACK Broadcasted to {0}:{1}", MulticastAddress, RemoteServiceName));
+                }
             }
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            SendTack("255.255.255.255");
+            SendTack();
         }
     }
+    
+
     class NetworkInterface
     {
         public static string[] IpAddresses
