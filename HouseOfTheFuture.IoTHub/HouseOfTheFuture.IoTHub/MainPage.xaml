@@ -9,7 +9,5 @@
     Loaded="MainPage_OnLoaded">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="kakBox" Text="GODVER KAK" />
-        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="150,168,0,0" VerticalAlignment="Top" Click="button_Click"/>
     </Grid>
 </Page>
