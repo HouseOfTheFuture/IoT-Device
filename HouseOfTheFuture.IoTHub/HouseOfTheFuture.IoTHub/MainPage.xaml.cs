@@ -42,45 +42,84 @@ namespace HouseOfTheFuture.IoTHub
 
         private void MainPage_OnLoaded(object sender, RoutedEventArgs e)
         {
-            using (NetworkInterface ni = new NetworkInterface())
-            {
-                Debug.WriteLine("Clicked!");
-                ni.Connect(new HostName("255.255.255.255"), "5321");
-                string cmd = "Hello there\r";
+            ListenOnAllIps();
+        }
 
-                ni.SendMessage(cmd);
+        private async Task ListenOnAllIps()
+        {
+            foreach (var hostname in NetworkInformation.GetHostNames()
+                .Where(x => x.IPInformation != null
+                            && (x.IPInformation.NetworkAdapter.IanaInterfaceType == 71 // wifi
+                                || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6) && x.Type == HostNameType.Ipv4)) // ethernet
+            {
+                ListenForTick(hostname);
             }
         }
-    }
-    class NetworkInterface : IDisposable
-    {
-        private readonly DatagramSocket _socket;
 
-        public NetworkInterface()
+        private async Task ListenForTick(HostName hostname)
         {
-            _socket = new DatagramSocket();
+            using (var socket = new DatagramSocket())
+            {
+                socket.MessageReceived += Socket_MessageReceived;
+                await socket.BindServiceNameAsync("5321", hostname.IPInformation.NetworkAdapter);
+                Debug.WriteLine("CONNECTED");
+                await socket.ConnectAsync(new HostName("255.255.255.255"), "5321");
+                var stream = socket.OutputStream;
+
+
+                var writer = new DataWriter(stream);
+
+                writer.WriteString("TICK");
+
+                await writer.StoreAsync();
+            }
         }
 
-        public async void Connect(HostName remoteHostName, string remoteServiceNameOrPort)
+        private void Socket_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
         {
-            await _socket.ConnectAsync(remoteHostName, remoteServiceNameOrPort);
-        }
-
-        public async void SendMessage(string message)
-        {
-            var stream = _socket.OutputStream;
+            var stream = sender.OutputStream;
 
             var writer = new DataWriter(stream);
 
-            writer.WriteString(message);
+            writer.WriteString("TACK");
 
-            await writer.StoreAsync();
+            writer.StoreAsync();
         }
 
-        public void Dispose()
+        private async Task SendTack()
         {
-            _socket.Dispose();
+            using (var socket = new DatagramSocket())
+            {
+                await socket.ConnectAsync(new HostName("255.255.255.255"), "5321");
+                var stream = socket.OutputStream;
+
+                var writer = new DataWriter(stream);
+
+                writer.WriteString("TACK");
+
+                await writer.StoreAsync();
+            }
         }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            SendTack();
+        }
+    }
+    class NetworkInterface
+    {
+        public static string[] IpAddresses
+        {
+            get
+            {
+                return NetworkInformation.GetHostNames()
+                    .Where(x =>x.IPInformation != null 
+                    && (x.IPInformation.NetworkAdapter.IanaInterfaceType == 71 // wifi
+                    || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6))// ethernet
+                    .Select(x => x.DisplayName).ToArray(); 
+            }
+        }
+
     }
 
 }
