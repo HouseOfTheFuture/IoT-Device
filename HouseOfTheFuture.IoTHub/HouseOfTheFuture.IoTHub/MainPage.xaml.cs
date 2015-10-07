@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.AllJoyn;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Networking;
@@ -37,8 +38,9 @@ namespace HouseOfTheFuture.IoTHub
     {
         private const string MulticastAddress = "239.255.42.99";
         private const string RemoteServiceName = "5321";
-        private StringBuilder _log;
-        private HostName[] _adapters;
+        private readonly StringBuilder _log;
+        private NetworkAdapter[] _adapters;
+        private Task<DatagramSocket>[] _suckits;
 
         public MainPage()
         {
@@ -51,21 +53,22 @@ namespace HouseOfTheFuture.IoTHub
             _adapters = NetworkInformation.GetHostNames()
                 .Where(x => x.IPInformation != null
                             && (x.IPInformation.NetworkAdapter.IanaInterfaceType == 71 // wifi
-                                || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6) && x.Type == HostNameType.Ipv4).ToArray(); // ethernet
-            foreach (var hostName in _adapters)
-            {
-                ListenForTick(hostName);
-            }
+                                || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6))
+                                .Select(x => x.IPInformation.NetworkAdapter)
+                                .Distinct(new NetworkAdapterComparer())
+                                .ToArray(); // ethernet
+
+            _suckits = _adapters.Select(ListenForTick).ToArray();
         }
 
-        private async Task ListenForTick(HostName hostname)
+        private async Task<DatagramSocket> ListenForTick(NetworkAdapter hostname)
         {
             var socket = new DatagramSocket();
             socket.MessageReceived += Socket_MessageReceived;
-            await socket.BindServiceNameAsync(RemoteServiceName, hostname.IPInformation.NetworkAdapter);
+            await socket.BindServiceNameAsync(RemoteServiceName, hostname);
             socket.JoinMulticastGroup(new HostName(MulticastAddress));
-            Log(string.Format("Listening on {0}:{1}", hostname.DisplayName, RemoteServiceName));
-            
+            Log(string.Format("Listening on {0}:{1}", hostname.NetworkAdapterId, RemoteServiceName));
+            return socket;
         }
 
         private async Task Log(string format)
@@ -95,7 +98,7 @@ namespace HouseOfTheFuture.IoTHub
             {
                 using (var socket = new DatagramSocket())
                 {
-                    await socket.BindServiceNameAsync("", hostName.IPInformation.NetworkAdapter);
+                    await socket.BindServiceNameAsync("", hostName);
                     socket.JoinMulticastGroup(new HostName(MulticastAddress));
                     IOutputStream outputStream = await socket.GetOutputStreamAsync(new HostName(MulticastAddress), RemoteServiceName);
                     byte[] buffer = Encoding.UTF8.GetBytes("Protocol message");
@@ -111,8 +114,29 @@ namespace HouseOfTheFuture.IoTHub
         {
             SendTack();
         }
+
+        private void MainPage_OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            foreach (var suckit in _suckits)
+            {
+                suckit.Result.Dispose();
+            }
+        }
     }
-    
+
+    internal class NetworkAdapterComparer : IEqualityComparer<NetworkAdapter>
+    {
+        public bool Equals(NetworkAdapter x, NetworkAdapter y)
+        {
+            return Equals(x.NetworkAdapterId, y.NetworkAdapterId);
+        }
+
+        public int GetHashCode(NetworkAdapter obj)
+        {
+            return obj.NetworkAdapterId.GetHashCode();
+        }
+    }
+
 
     class NetworkInterface
     {
