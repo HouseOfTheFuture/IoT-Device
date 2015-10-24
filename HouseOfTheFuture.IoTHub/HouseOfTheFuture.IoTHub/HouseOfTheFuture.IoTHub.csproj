@@ -99,10 +99,30 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Entities\DeviceIdentifier.cs" />
+    <Compile Include="Entities\DeviceRegistration.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\Account.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\AccountExtensions.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\HouseOfTheFutureApiHost.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\HouseOfTheFutureApiHostAppServiceExtensions.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\HouseOfTheFutureApiHostExtensions.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\IAccount.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\IHouseOfTheFutureApiHost.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\IIotRegister.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\IotRegister.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\IotRegisterExtensions.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\ITest.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\Models\RegisterIotDeviceRequest.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\Models\RegisterIotDeviceResponse.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\Models\RegistrationDto.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\Test.cs" />
+    <Compile Include="HouseOfTheFuture.Api.Host\TestExtensions.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\NetworkAdapterComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\LocalStorageService.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -130,6 +150,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
