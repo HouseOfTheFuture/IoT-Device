@@ -6,6 +6,7 @@ using System.Net.Http;
 using Windows.ApplicationModel.Background;
 using System.Threading.Tasks;
 using HouseOfTheFuture.RF24Library;
+using Windows.Devices.Gpio;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -15,8 +16,17 @@ namespace HouseOfTheFuture.RF24Communicator
     {
         public void Run(IBackgroundTaskInstance taskInstance)
         {
-            var module = new NRF24L01Plus();
-            
+            try
+            {
+                var module = new NRF24L01Plus();
+                module.Initialize(Windows.Devices.Spi.SpiMode.Mode0, 24, 22, 13);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
         }
     }
 }

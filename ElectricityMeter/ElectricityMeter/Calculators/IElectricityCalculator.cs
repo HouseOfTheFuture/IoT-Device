@@ -14,7 +14,7 @@ namespace ElectricityMeter.Calculators
         void voltageTX(double _VCAL, double _PHASECAL);
         void currentTX(uint _channel, double _ICAL);
 
-        int GetSupplyVoltage();
+        long GetSupplyVoltage();
         void calcVI(uint crossings, uint timeout);
         double calcIrms(uint numberOfSamples);
         void serialprint();
