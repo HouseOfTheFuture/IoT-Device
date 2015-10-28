@@ -90,7 +90,6 @@ namespace HouseOfTheFuture.RF24Library
 
             // Module reset time
             var task = Task.Delay(100);
-            task.Start();
             task.Wait();
 
             _initialized = true;
@@ -103,14 +102,16 @@ namespace HouseOfTheFuture.RF24Library
             {
                 //new SPI(new SPI.Configuration(chipSelectPin, false, 0, 0, false, true, 2000, spi));
                 //public Configuration(Cpu.Pin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI.SPI_module SPI_mod);
-                var settings = new SpiConnectionSettings(chipSelectPin); /* Create SPI initialization settings                               */
-                settings.ClockFrequency = 20000000;                             /* Datasheet specifies maximum SPI clock frequency of 10MHz         */
-                settings.Mode = mode;                                  /* The display expects an idle-high clock polarity, we use Mode3
+                var settings = new SpiConnectionSettings(0); /* Create SPI initialization settings                               */
+                settings.ClockFrequency = 500000;                             /* Datasheet specifies maximum SPI clock frequency of 10MHz         */
+                settings.Mode = mode;
+                settings.DataBitLength = 8;
+                settings.SharingMode = SpiSharingMode.Shared;                                                    /* The display expects an idle-high clock polarity, we use Mode3
                                                                          * to set the clock polarity and phase to: CPOL = 1, CPHA = 1
                                                                          */
-
                 string spiAqs = SpiDevice.GetDeviceSelector();       /* Find the selector string for the SPI bus controller          */
-                var devicesInfo = await DeviceInformation.FindAllAsync(spiAqs);         /* Find the SPI bus controller device with our selector string  */
+                var devicesInfo = await DeviceInformation.FindAllAsync(spiAqs);
+                                                                 /* Find the SPI bus controller device with our selector string  */
                 return await SpiDevice.FromIdAsync(devicesInfo[0].Id, settings);  /* Create an SpiDevice with our bus controller and SPI settings */
 
             }
