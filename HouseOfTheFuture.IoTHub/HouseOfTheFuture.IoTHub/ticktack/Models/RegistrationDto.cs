@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace HouseOfTheFuture.IoTHub.Models
+namespace HouseOfTheFuture.IoTHub.Host.Models
 {
     public partial class RegistrationDto
     {

@@ -5,16 +5,16 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub;
-using HouseOfTheFuture.IoTHub.Models;
+using HouseOfTheFuture.IoTHub.Host;
+using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
     public static partial class AccountExtensions
     {
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.IAccount.
+        /// Reference to the HouseOfTheFuture.IoTHub.Host.IAccount.
         /// </param>
         /// <param name='register'>
         /// Required.
@@ -29,7 +29,7 @@ namespace HouseOfTheFuture.IoTHub
         }
         
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.IAccount.
+        /// Reference to the HouseOfTheFuture.IoTHub.Host.IAccount.
         /// </param>
         /// <param name='register'>
         /// Required.

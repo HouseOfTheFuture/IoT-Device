@@ -1,29 +1,35 @@
 ﻿using System;
+using System.IO;
+using Windows.Storage;
 using HouseOfTheFuture.IoTHub.Entities;
+using Newtonsoft.Json;
 
 namespace HouseOfTheFuture.IoTHub.Services
 {
     interface ILocalStorageService
     {
         DeviceIdentifier? CheckForExistingDeviceIdentifier();
-        void PersistDeviceIdentifier();
+        void PersistDeviceIdentifier(DeviceIdentifier deviceIdentifier);
     }
 
     class LocalStorageService
         : ILocalStorageService
     {
+        private const string FileName = "deviceconfig.json";
+
         public DeviceIdentifier? CheckForExistingDeviceIdentifier()
         {
-            // todo: Retrieve existing device identifier from the Pi if present. 
-
-            return new DeviceIdentifier(Guid.NewGuid());
+            var id = (string) ApplicationData.Current.LocalSettings.Values["deviceconfig"];
+            if (!string.IsNullOrEmpty(id))
+            {
+                return new DeviceIdentifier(id);
+            }
+            return null;
         }
 
-        public void PersistDeviceIdentifier()
+        public void PersistDeviceIdentifier(DeviceIdentifier deviceIdentifier)
         {
-            // todo: Store the device identifier to the Pi's local storage. 
-
-            throw new NotImplementedException();
+            ApplicationData.Current.LocalSettings.Values["deviceconfig"] = deviceIdentifier.ToString();
         }
-    }    
-}
+    }
+}    

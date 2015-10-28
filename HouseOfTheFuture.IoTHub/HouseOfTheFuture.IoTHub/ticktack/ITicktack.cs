@@ -3,12 +3,12 @@
 
 using System;
 using System.Linq;
-using HouseOfTheFuture.IoTHub;
+using HouseOfTheFuture.IoTHub.Host;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
-    public partial interface IHouseOfTheFutureApiHost : IDisposable
+    public partial interface ITicktack : IDisposable
     {
         /// <summary>
         /// The base URI of the service.

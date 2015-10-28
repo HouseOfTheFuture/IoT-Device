@@ -10,33 +10,32 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub;
-using HouseOfTheFuture.IoTHub.Models;
+using HouseOfTheFuture.IoTHub.Host;
+using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
-    internal partial class IotRegister : IServiceOperations<HouseOfTheFutureApiHost>, IIotRegister
+    internal partial class Account : IServiceOperations<Ticktack>, IAccount
     {
         /// <summary>
-        /// Initializes a new instance of the IotRegister class.
+        /// Initializes a new instance of the Account class.
         /// </summary>
         /// <param name='client'>
         /// Reference to the service client.
         /// </param>
-        internal IotRegister(HouseOfTheFutureApiHost client)
+        internal Account(Ticktack client)
         {
             this._client = client;
         }
         
-        private HouseOfTheFutureApiHost _client;
+        private Ticktack _client;
         
         /// <summary>
-        /// Gets a reference to the
-        /// HouseOfTheFuture.IoTHub.HouseOfTheFutureApiHost.
+        /// Gets a reference to the HouseOfTheFuture.IoTHub.Host.Ticktack.
         /// </summary>
-        public HouseOfTheFutureApiHost Client
+        public Ticktack Client
         {
             get { return this._client; }
         }
@@ -47,7 +46,7 @@ namespace HouseOfTheFuture.IoTHub
         /// <param name='cancellationToken'>
         /// Cancellation token.
         /// </param>
-        public async Task<HttpOperationResponse<RegisterIotDeviceResponse>> PostWithOperationResponseAsync(RegisterIotDeviceRequest register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async Task<HttpOperationResponse<string>> PostWithOperationResponseAsync(RegistrationDto register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // Validate
             if (register == null)
@@ -68,7 +67,7 @@ namespace HouseOfTheFuture.IoTHub
             
             // Construct URL
             string url = "";
-            url = url + "/iot/register";
+            url = url + "/account/register";
             string baseUrl = this.Client.BaseUri.AbsoluteUri;
             // Trim '/' character from the end of baseUrl and beginning of url.
             if (baseUrl[baseUrl.Length - 1] == '/')
@@ -131,14 +130,14 @@ namespace HouseOfTheFuture.IoTHub
             }
             
             // Create Result
-            HttpOperationResponse<RegisterIotDeviceResponse> result = new HttpOperationResponse<RegisterIotDeviceResponse>();
+            HttpOperationResponse<string> result = new HttpOperationResponse<string>();
             result.Request = httpRequest;
             result.Response = httpResponse;
             
             // Deserialize Response
             if (statusCode == HttpStatusCode.OK)
             {
-                RegisterIotDeviceResponse resultModel = new RegisterIotDeviceResponse();
+                string resultModel = default(string);
                 JToken responseDoc = null;
                 if (string.IsNullOrEmpty(responseContent) == false)
                 {
@@ -146,7 +145,7 @@ namespace HouseOfTheFuture.IoTHub
                 }
                 if (responseDoc != null)
                 {
-                    resultModel.DeserializeJson(responseDoc);
+                    resultModel = responseDoc.ToString(Newtonsoft.Json.Formatting.Indented);
                 }
                 result.Body = resultModel;
             }

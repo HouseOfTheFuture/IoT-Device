@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
     public partial interface ITest
     {

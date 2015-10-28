@@ -5,10 +5,10 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub.Models;
+using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
     public partial interface IIotRegister
     {

@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace HouseOfTheFuture.IoTHub.Models
+namespace HouseOfTheFuture.IoTHub.Host.Models
 {
     public partial class RegisterIotDeviceResponse
     {
@@ -18,6 +18,17 @@ namespace HouseOfTheFuture.IoTHub.Models
         {
             get { return this._deviceId; }
             set { this._deviceId = value; }
+        }
+        
+        private string _hubDeviceKey;
+        
+        /// <summary>
+        /// Optional.
+        /// </summary>
+        public string HubDeviceKey
+        {
+            get { return this._hubDeviceKey; }
+            set { this._hubDeviceKey = value; }
         }
         
         private bool? _isConfigured;
@@ -49,6 +60,11 @@ namespace HouseOfTheFuture.IoTHub.Models
                 if (deviceIdValue != null && deviceIdValue.Type != JTokenType.Null)
                 {
                     this.DeviceId = ((string)deviceIdValue);
+                }
+                JToken hubDeviceKeyValue = inputObject["hubDeviceKey"];
+                if (hubDeviceKeyValue != null && hubDeviceKeyValue.Type != JTokenType.Null)
+                {
+                    this.HubDeviceKey = ((string)hubDeviceKeyValue);
                 }
                 JToken isConfiguredValue = inputObject["isConfigured"];
                 if (isConfiguredValue != null && isConfiguredValue.Type != JTokenType.Null)

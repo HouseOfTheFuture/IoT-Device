@@ -5,16 +5,16 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub;
-using HouseOfTheFuture.IoTHub.Models;
+using HouseOfTheFuture.IoTHub.Host;
+using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
     public static partial class IotRegisterExtensions
     {
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.IIotRegister.
+        /// Reference to the HouseOfTheFuture.IoTHub.Host.IIotRegister.
         /// </param>
         /// <param name='register'>
         /// Required.
@@ -29,7 +29,7 @@ namespace HouseOfTheFuture.IoTHub
         }
         
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.IIotRegister.
+        /// Reference to the HouseOfTheFuture.IoTHub.Host.IIotRegister.
         /// </param>
         /// <param name='register'>
         /// Required.
@@ -39,7 +39,7 @@ namespace HouseOfTheFuture.IoTHub
         /// </param>
         public static async Task<RegisterIotDeviceResponse> PostAsync(this IIotRegister operations, RegisterIotDeviceRequest register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            Microsoft.Rest.HttpOperationResponse<HouseOfTheFuture.IoTHub.Models.RegisterIotDeviceResponse> result = await operations.PostWithOperationResponseAsync(register, cancellationToken).ConfigureAwait(false);
+            Microsoft.Rest.HttpOperationResponse<HouseOfTheFuture.IoTHub.Host.Models.RegisterIotDeviceResponse> result = await operations.PostWithOperationResponseAsync(register, cancellationToken).ConfigureAwait(false);
             return result.Body;
         }
     }

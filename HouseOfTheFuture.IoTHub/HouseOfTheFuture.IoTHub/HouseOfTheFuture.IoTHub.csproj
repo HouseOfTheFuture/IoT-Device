@@ -101,28 +101,28 @@
     </Compile>
     <Compile Include="Entities\DeviceIdentifier.cs" />
     <Compile Include="Entities\DeviceRegistration.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\Account.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\AccountExtensions.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\HouseOfTheFutureApiHost.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\HouseOfTheFutureApiHostAppServiceExtensions.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\HouseOfTheFutureApiHostExtensions.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\IAccount.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\IHouseOfTheFutureApiHost.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\IIotRegister.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\IotRegister.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\IotRegisterExtensions.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\ITest.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\Models\RegisterIotDeviceRequest.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\Models\RegisterIotDeviceResponse.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\Models\RegistrationDto.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\Test.cs" />
-    <Compile Include="HouseOfTheFuture.Api.Host\TestExtensions.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\NetworkAdapterComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\LocalStorageService.cs" />
+    <Compile Include="ticktack\Account.cs" />
+    <Compile Include="ticktack\AccountExtensions.cs" />
+    <Compile Include="ticktack\IAccount.cs" />
+    <Compile Include="ticktack\IIotRegister.cs" />
+    <Compile Include="ticktack\IotRegister.cs" />
+    <Compile Include="ticktack\IotRegisterExtensions.cs" />
+    <Compile Include="ticktack\ITest.cs" />
+    <Compile Include="ticktack\ITicktack.cs" />
+    <Compile Include="ticktack\Models\RegisterIotDeviceRequest.cs" />
+    <Compile Include="ticktack\Models\RegisterIotDeviceResponse.cs" />
+    <Compile Include="ticktack\Models\RegistrationDto.cs" />
+    <Compile Include="ticktack\Test.cs" />
+    <Compile Include="ticktack\TestExtensions.cs" />
+    <Compile Include="ticktack\Ticktack.cs" />
+    <Compile Include="ticktack\TicktackAppServiceExtensions.cs" />
+    <Compile Include="ticktack\TicktackExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

@@ -4,12 +4,12 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using HouseOfTheFuture.IoTHub;
+using HouseOfTheFuture.IoTHub.Host;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub
+namespace HouseOfTheFuture.IoTHub.Host
 {
-    public partial class HouseOfTheFutureApiHost : ServiceClient<HouseOfTheFutureApiHost>, IHouseOfTheFutureApiHost
+    public partial class Ticktack : ServiceClient<Ticktack>, ITicktack
     {
         private Uri _baseUri;
         
@@ -55,35 +55,35 @@ namespace HouseOfTheFuture.IoTHub
         }
         
         /// <summary>
-        /// Initializes a new instance of the HouseOfTheFutureApiHost class.
+        /// Initializes a new instance of the Ticktack class.
         /// </summary>
-        public HouseOfTheFutureApiHost()
+        public Ticktack()
             : base()
         {
             this._account = new Account(this);
             this._iotRegister = new IotRegister(this);
             this._test = new Test(this);
-            this._baseUri = new Uri("https://microsoft-apiapp7d7289d8c2e244eaadcc92fe9bc03bd2.azurewebsites.net:443");
+            this._baseUri = new Uri("https://microsoft-apiapp7d7289d8c2e244eaadcc92fe9bc03bd2.azurewebsites.net");
         }
         
         /// <summary>
-        /// Initializes a new instance of the HouseOfTheFutureApiHost class.
+        /// Initializes a new instance of the Ticktack class.
         /// </summary>
         /// <param name='handlers'>
         /// Optional. The set of delegating handlers to insert in the http
         /// client pipeline.
         /// </param>
-        public HouseOfTheFutureApiHost(params DelegatingHandler[] handlers)
+        public Ticktack(params DelegatingHandler[] handlers)
             : base(handlers)
         {
             this._account = new Account(this);
             this._iotRegister = new IotRegister(this);
             this._test = new Test(this);
-            this._baseUri = new Uri("https://microsoft-apiapp7d7289d8c2e244eaadcc92fe9bc03bd2.azurewebsites.net:443");
+            this._baseUri = new Uri("https://microsoft-apiapp7d7289d8c2e244eaadcc92fe9bc03bd2.azurewebsites.net");
         }
         
         /// <summary>
-        /// Initializes a new instance of the HouseOfTheFutureApiHost class.
+        /// Initializes a new instance of the Ticktack class.
         /// </summary>
         /// <param name='rootHandler'>
         /// Optional. The http client handler used to handle http transport.
@@ -92,17 +92,17 @@ namespace HouseOfTheFuture.IoTHub
         /// Optional. The set of delegating handlers to insert in the http
         /// client pipeline.
         /// </param>
-        public HouseOfTheFutureApiHost(HttpClientHandler rootHandler, params DelegatingHandler[] handlers)
+        public Ticktack(HttpClientHandler rootHandler, params DelegatingHandler[] handlers)
             : base(rootHandler, handlers)
         {
             this._account = new Account(this);
             this._iotRegister = new IotRegister(this);
             this._test = new Test(this);
-            this._baseUri = new Uri("https://microsoft-apiapp7d7289d8c2e244eaadcc92fe9bc03bd2.azurewebsites.net:443");
+            this._baseUri = new Uri("https://microsoft-apiapp7d7289d8c2e244eaadcc92fe9bc03bd2.azurewebsites.net");
         }
         
         /// <summary>
-        /// Initializes a new instance of the HouseOfTheFutureApiHost class.
+        /// Initializes a new instance of the Ticktack class.
         /// </summary>
         /// <param name='baseUri'>
         /// Optional. The base URI of the service.
@@ -111,7 +111,7 @@ namespace HouseOfTheFuture.IoTHub
         /// Optional. The set of delegating handlers to insert in the http
         /// client pipeline.
         /// </param>
-        public HouseOfTheFutureApiHost(Uri baseUri, params DelegatingHandler[] handlers)
+        public Ticktack(Uri baseUri, params DelegatingHandler[] handlers)
             : this(handlers)
         {
             if (baseUri == null)
@@ -122,7 +122,7 @@ namespace HouseOfTheFuture.IoTHub
         }
         
         /// <summary>
-        /// Initializes a new instance of the HouseOfTheFutureApiHost class.
+        /// Initializes a new instance of the Ticktack class.
         /// </summary>
         /// <param name='credentials'>
         /// Required. Credentials for authenticating with the service.
@@ -131,7 +131,7 @@ namespace HouseOfTheFuture.IoTHub
         /// Optional. The set of delegating handlers to insert in the http
         /// client pipeline.
         /// </param>
-        public HouseOfTheFutureApiHost(ServiceClientCredentials credentials, params DelegatingHandler[] handlers)
+        public Ticktack(ServiceClientCredentials credentials, params DelegatingHandler[] handlers)
             : this(handlers)
         {
             if (credentials == null)
@@ -147,7 +147,7 @@ namespace HouseOfTheFuture.IoTHub
         }
         
         /// <summary>
-        /// Initializes a new instance of the HouseOfTheFutureApiHost class.
+        /// Initializes a new instance of the Ticktack class.
         /// </summary>
         /// <param name='baseUri'>
         /// Optional. The base URI of the service.
@@ -159,7 +159,7 @@ namespace HouseOfTheFuture.IoTHub
         /// Optional. The set of delegating handlers to insert in the http
         /// client pipeline.
         /// </param>
-        public HouseOfTheFutureApiHost(Uri baseUri, ServiceClientCredentials credentials, params DelegatingHandler[] handlers)
+        public Ticktack(Uri baseUri, ServiceClientCredentials credentials, params DelegatingHandler[] handlers)
             : this(handlers)
         {
             if (baseUri == null)

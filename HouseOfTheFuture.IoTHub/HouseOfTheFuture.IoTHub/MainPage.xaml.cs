@@ -12,7 +12,8 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using HouseOfTheFuture.IoTHub.Entities;
 using HouseOfTheFuture.IoTHub.Helpers;
-using HouseOfTheFuture.IoTHub.Models;
+using HouseOfTheFuture.IoTHub.Host;
+using HouseOfTheFuture.IoTHub.Host.Models;
 using HouseOfTheFuture.IoTHub.Services;
 
 namespace HouseOfTheFuture.IoTHub
@@ -45,12 +46,10 @@ namespace HouseOfTheFuture.IoTHub
             var existingDeviceIdentifier = _localStorageService.CheckForExistingDeviceIdentifier();
             var deviceRegistration = await RegisterDeviceAsync(existingDeviceIdentifier);
 
-            if (!existingDeviceIdentifier.HasValue)
-            {
-                _localStorageService.PersistDeviceIdentifier();
-            }
+            DeviceRegistration.Current = deviceRegistration;
+            _localStorageService.PersistDeviceIdentifier(deviceRegistration.DeviceIdentifier);
             
-            BroadcastDeviceIdentifier(deviceRegistration.DeviceIdentifier);                        
+            await BroadcastDeviceIdentifier(deviceRegistration.DeviceIdentifier);                        
         }        
 
         private void ListenForBroadcastFromMobileApp()
@@ -68,7 +67,7 @@ namespace HouseOfTheFuture.IoTHub
 
         private async Task<DeviceRegistration> RegisterDeviceAsync(DeviceIdentifier? deviceIdentifier)
         {
-            using (var client = new HouseOfTheFutureApiHost())
+            using (var client = new Ticktack())
             {
                 var response = await client.IotRegister
                     .PostWithOperationResponseAsync(new RegisterIotDeviceRequest
@@ -76,9 +75,12 @@ namespace HouseOfTheFuture.IoTHub
                         CurrentDeviceId = deviceIdentifier?.ToString()
                     });
                 
-                var deviceId = response.Body.DeviceId;
-
-                return new DeviceRegistration {  DeviceIdentifier = new DeviceIdentifier(deviceId) };
+                return new DeviceRegistration
+                {
+                    DeviceIdentifier = new DeviceIdentifier(response.Body.DeviceId),
+                    HubDeviceKey = response.Body.HubDeviceKey,
+                    IsConfigured = response.Body.IsConfigured ?? false
+                };
             }            
         }
 
