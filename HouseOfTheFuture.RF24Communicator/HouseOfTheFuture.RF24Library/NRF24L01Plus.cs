@@ -78,11 +78,11 @@ namespace HouseOfTheFuture.RF24Library
 
             _irqPin = gpio.OpenPin(interruptPin);
             _irqPin.SetDriveMode(GpioPinDriveMode.InputPullUp);
-            
+
             // Initialize IRQ Port
-            //_irqPin = new InterruptPort(interruptPin, false, Port.ResistorMode.PullUp,
+            // _irqPin = new InterruptPort(interruptPin, false, Port.ResistorMode.PullUp,
             //                            Port.InterruptMode.InterruptEdgeLow);
-            //_irqPin.OnInterrupt += HandleInterrupt;
+            _irqPin.ValueChanged += _irqPin_ValueChanged;
 
             _cePin = gpio.OpenPin(chipEnablePin);
             // Initialize Chip Enable Port
@@ -95,18 +95,24 @@ namespace HouseOfTheFuture.RF24Library
             _initialized = true;
         }
 
+        private void _irqPin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+        {
+            HandleInterrupt(0, 0, DateTime.Now);
+        }
+
         /* Initialize the SPI bus */
         private async Task<SpiDevice> InitSpi(int chipSelectPin, SpiMode mode)
         {
             try
             {
+                
                 //new SPI(new SPI.Configuration(chipSelectPin, false, 0, 0, false, true, 2000, spi));
                 //public Configuration(Cpu.Pin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI.SPI_module SPI_mod);
                 var settings = new SpiConnectionSettings(0); /* Create SPI initialization settings                               */
-                settings.ClockFrequency = 500000;                             /* Datasheet specifies maximum SPI clock frequency of 10MHz         */
+                settings.ClockFrequency = 2000000;                             /* Datasheet specifies maximum SPI clock frequency of 10MHz         */
                 settings.Mode = mode;
                 settings.DataBitLength = 8;
-                settings.SharingMode = SpiSharingMode.Shared;                                                    /* The display expects an idle-high clock polarity, we use Mode3
+                settings.SharingMode = SpiSharingMode.Exclusive;                                                    /* The display expects an idle-high clock polarity, we use Mode3
                                                                          * to set the clock polarity and phase to: CPOL = 1, CPHA = 1
                                                                          */
                 string spiAqs = SpiDevice.GetDeviceSelector();       /* Find the selector string for the SPI bus controller          */
@@ -124,12 +130,14 @@ namespace HouseOfTheFuture.RF24Library
 
         private void SetEnabled()
         {
+            _irqPin.Write(GpioPinValue.High);
    //         _irqPin.EnableInterrupt();
                _cePin.Write(GpioPinValue.High);
         }
 
         private void SetDisabled()
         {
+            _irqPin.Write(GpioPinValue.Low);
             _cePin.Write(GpioPinValue.Low);
             //_irqPin.DisableInterrupt();
         }
@@ -303,8 +311,9 @@ namespace HouseOfTheFuture.RF24Library
             Array.Copy(data, 0, writeBuffer, 1, data.Length);
 
             // Do SPI Read/Write
-            _spiDevice.Read(readBuffer);
+
             _spiDevice.Write(writeBuffer);
+            _spiDevice.Read(readBuffer);
             //_spiPort.WriteRead(writeBuffer, readBuffer);
 
             // Enable module back if it was disabled
@@ -413,7 +422,7 @@ namespace HouseOfTheFuture.RF24Library
             }
         }
 
-        private void HandleInterrupt(uint data1, uint data2, DateTime dateTime)
+        public void HandleInterrupt(uint data1, uint data2, DateTime dateTime)
         {
             if (!_initialized)
                 return;
