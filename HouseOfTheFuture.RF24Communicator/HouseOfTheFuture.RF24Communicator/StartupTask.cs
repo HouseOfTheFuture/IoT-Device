@@ -35,6 +35,7 @@ namespace HouseOfTheFuture.RF24Communicator
                 var module = new SerialCommunicationModule();
                 var results = module.ListAvailablePorts().Result;
                 module.SelectDevice(results.First());
+                module.CancelReadTask();
                 while(true)
                 {
                     Task.Delay(1000).Wait();
