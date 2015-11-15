@@ -29,13 +29,12 @@ namespace HouseOfTheFuture.RF24Communicator
             RunSerialCommunicationModule();
         }
 
-        private async void RunSerialCommunicationModule()
+        private void RunSerialCommunicationModule()
         {
             try {
                 var module = new SerialCommunicationModule();
                 var results = module.ListAvailablePorts().Result;
                 module.SelectDevice(results.First());
-                module.CancelReadTask();
                 while(true)
                 {
                     Task.Delay(1000).Wait();
@@ -78,7 +77,7 @@ namespace HouseOfTheFuture.RF24Communicator
             }
             catch (Exception e)
             {
-
+                Debug.WriteLine(e.Message);
                 throw;
             }
         }
