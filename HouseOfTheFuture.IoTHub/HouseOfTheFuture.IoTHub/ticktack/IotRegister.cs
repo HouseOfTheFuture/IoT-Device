@@ -10,14 +10,14 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub.Host;
-using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
+using TickTack;
+using TickTack.Models;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
-    internal partial class IotRegister : IServiceOperations<Ticktack>, IIotRegister
+    internal partial class IotRegister : IServiceOperations<HouseOfTheFutureApiHost>, IIotRegister
     {
         /// <summary>
         /// Initializes a new instance of the IotRegister class.
@@ -25,17 +25,17 @@ namespace HouseOfTheFuture.IoTHub.Host
         /// <param name='client'>
         /// Reference to the service client.
         /// </param>
-        internal IotRegister(Ticktack client)
+        internal IotRegister(HouseOfTheFutureApiHost client)
         {
             this._client = client;
         }
         
-        private Ticktack _client;
+        private HouseOfTheFutureApiHost _client;
         
         /// <summary>
-        /// Gets a reference to the HouseOfTheFuture.IoTHub.Host.Ticktack.
+        /// Gets a reference to the TickTack.HouseOfTheFutureApiHost.
         /// </summary>
-        public Ticktack Client
+        public HouseOfTheFutureApiHost Client
         {
             get { return this._client; }
         }

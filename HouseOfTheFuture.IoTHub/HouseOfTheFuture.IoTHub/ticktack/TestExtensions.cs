@@ -5,15 +5,15 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub.Host;
 using Microsoft.Rest;
+using TickTack;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
     public static partial class TestExtensions
     {
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.Host.ITest.
+        /// Reference to the TickTack.ITest.
         /// </param>
         public static string Get(this ITest operations)
         {
@@ -25,7 +25,7 @@ namespace HouseOfTheFuture.IoTHub.Host
         }
         
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.Host.ITest.
+        /// Reference to the TickTack.ITest.
         /// </param>
         /// <param name='cancellationToken'>
         /// Cancellation token.

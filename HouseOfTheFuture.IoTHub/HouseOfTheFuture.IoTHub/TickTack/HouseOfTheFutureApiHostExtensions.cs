@@ -4,9 +4,9 @@
 using System;
 using System.Linq;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
-    public static partial class TicktackExtensions
+    public static partial class HouseOfTheFutureApiHostExtensions
     {
     }
 }

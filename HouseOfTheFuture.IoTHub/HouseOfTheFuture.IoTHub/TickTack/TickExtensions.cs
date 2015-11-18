@@ -11,35 +11,35 @@ using TickTack.Models;
 
 namespace TickTack
 {
-    public static partial class AccountExtensions
+    public static partial class TickExtensions
     {
         /// <param name='operations'>
-        /// Reference to the TickTack.IAccount.
+        /// Reference to the TickTack.ITick.
         /// </param>
-        /// <param name='register'>
+        /// <param name='request'>
         /// Required.
         /// </param>
-        public static string Post(this IAccount operations, RegistrationDto register)
+        public static object Post(this ITick operations, PostRequest request)
         {
             return Task.Factory.StartNew((object s) => 
             {
-                return ((IAccount)s).PostAsync(register);
+                return ((ITick)s).PostAsync(request);
             }
             , operations, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
         
         /// <param name='operations'>
-        /// Reference to the TickTack.IAccount.
+        /// Reference to the TickTack.ITick.
         /// </param>
-        /// <param name='register'>
+        /// <param name='request'>
         /// Required.
         /// </param>
         /// <param name='cancellationToken'>
         /// Cancellation token.
         /// </param>
-        public static async Task<string> PostAsync(this IAccount operations, RegistrationDto register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public static async Task<object> PostAsync(this ITick operations, PostRequest request, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            Microsoft.Rest.HttpOperationResponse<string> result = await operations.PostWithOperationResponseAsync(register, cancellationToken).ConfigureAwait(false);
+            Microsoft.Rest.HttpOperationResponse<object> result = await operations.PostWithOperationResponseAsync(request, cancellationToken).ConfigureAwait(false);
             return result.Body;
         }
     }

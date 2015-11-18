@@ -11,35 +11,29 @@ using TickTack.Models;
 
 namespace TickTack
 {
-    public static partial class AccountExtensions
+    public static partial class ServiceLocatorExtensions
     {
         /// <param name='operations'>
-        /// Reference to the TickTack.IAccount.
+        /// Reference to the TickTack.IServiceLocator.
         /// </param>
-        /// <param name='register'>
-        /// Required.
-        /// </param>
-        public static string Post(this IAccount operations, RegistrationDto register)
+        public static ServiceLocations Get(this IServiceLocator operations)
         {
             return Task.Factory.StartNew((object s) => 
             {
-                return ((IAccount)s).PostAsync(register);
+                return ((IServiceLocator)s).GetAsync();
             }
             , operations, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
         
         /// <param name='operations'>
-        /// Reference to the TickTack.IAccount.
-        /// </param>
-        /// <param name='register'>
-        /// Required.
+        /// Reference to the TickTack.IServiceLocator.
         /// </param>
         /// <param name='cancellationToken'>
         /// Cancellation token.
         /// </param>
-        public static async Task<string> PostAsync(this IAccount operations, RegistrationDto register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public static async Task<ServiceLocations> GetAsync(this IServiceLocator operations, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            Microsoft.Rest.HttpOperationResponse<string> result = await operations.PostWithOperationResponseAsync(register, cancellationToken).ConfigureAwait(false);
+            Microsoft.Rest.HttpOperationResponse<TickTack.Models.ServiceLocations> result = await operations.GetWithOperationResponseAsync(cancellationToken).ConfigureAwait(false);
             return result.Body;
         }
     }

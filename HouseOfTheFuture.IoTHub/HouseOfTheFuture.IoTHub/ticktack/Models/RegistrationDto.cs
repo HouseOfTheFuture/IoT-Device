@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace HouseOfTheFuture.IoTHub.Host.Models
+namespace TickTack.Models
 {
     public partial class RegistrationDto
     {

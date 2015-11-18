@@ -8,13 +8,13 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub.Host;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
+using TickTack;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
-    internal partial class Test : IServiceOperations<Ticktack>, ITest
+    internal partial class Test : IServiceOperations<HouseOfTheFutureApiHost>, ITest
     {
         /// <summary>
         /// Initializes a new instance of the Test class.
@@ -22,17 +22,17 @@ namespace HouseOfTheFuture.IoTHub.Host
         /// <param name='client'>
         /// Reference to the service client.
         /// </param>
-        internal Test(Ticktack client)
+        internal Test(HouseOfTheFutureApiHost client)
         {
             this._client = client;
         }
         
-        private Ticktack _client;
+        private HouseOfTheFutureApiHost _client;
         
         /// <summary>
-        /// Gets a reference to the HouseOfTheFuture.IoTHub.Host.Ticktack.
+        /// Gets a reference to the TickTack.HouseOfTheFutureApiHost.
         /// </summary>
-        public Ticktack Client
+        public HouseOfTheFutureApiHost Client
         {
             get { return this._client; }
         }
