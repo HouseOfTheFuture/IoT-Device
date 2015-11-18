@@ -1,60 +1,72 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
 using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using HouseOfTheFuture.IoTHub.Entities;
 using HouseOfTheFuture.IoTHub.Helpers;
-using HouseOfTheFuture.IoTHub.Host;
-using HouseOfTheFuture.IoTHub.Host.Models;
 using HouseOfTheFuture.IoTHub.Services;
+using Microsoft.Azure.Devices.Client;
+using Newtonsoft.Json;
+using TickTack;
+using TickTack.Models;
 
 namespace HouseOfTheFuture.IoTHub
 {
-    public sealed partial class MainPage : Page
-    {
-        private const string MulticastAddress = "239.255.42.99";
-        private const string RemoteServiceName = "5321";
-
-        private readonly StringBuilder _log;
-
-        private NetworkAdapter[] _adapters;
+    public sealed partial class MainPage 
+        : Page
+    {            
+        private readonly StringBuilder _log;        
         private Task<DatagramSocket>[] _sockets;
 
         private readonly ILocalStorageService _localStorageService;
+        private readonly FakeUsageReporter _fakeUsageReporter;
 
         public MainPage()
+            : this(new LocalStorageService(), new FakeUsageReporter())
+        {
+        }
+
+        public MainPage(ILocalStorageService localStorageService, FakeUsageReporter fakeUsageReporter)
         {
             InitializeComponent();
 
             _log = new StringBuilder();
 
-            _localStorageService = new LocalStorageService();
-        }                
+            _localStorageService = localStorageService;
+            _fakeUsageReporter = fakeUsageReporter;
+        }            
 
         private async void MainPage_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ListenForBroadcastFromMobileApp();
+            await InitializeDeviceIdentifierAsync();
 
+            ListenForBroadcastFromMobileApp();
+        }
+
+        private async Task InitializeDeviceIdentifierAsync()
+        {
             var existingDeviceIdentifier = _localStorageService.CheckForExistingDeviceIdentifier();
             var deviceRegistration = await RegisterDeviceAsync(existingDeviceIdentifier);
 
             DeviceRegistration.Current = deviceRegistration;
+
             _localStorageService.PersistDeviceIdentifier(deviceRegistration.DeviceIdentifier);
-            
-            await BroadcastDeviceIdentifier(deviceRegistration.DeviceIdentifier);                        
-        }        
+
+            _fakeUsageReporter.InitializeIoTHubClient();
+        }
 
         private void ListenForBroadcastFromMobileApp()
         {
-            _adapters = NetworkInformation.GetHostNames()
+            var adapters = NetworkInformation.GetHostNames()
                 .Where(x => x.IPInformation != null
                             && (x.IPInformation.NetworkAdapter.IanaInterfaceType == 71 // wifi
                                 || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6))
@@ -62,12 +74,25 @@ namespace HouseOfTheFuture.IoTHub
                 .Distinct(new NetworkAdapterComparer())
                 .ToArray(); // ethernet
 
-            _sockets = _adapters.Select(ListenForTick).ToArray();
+            _sockets = adapters.Select(ListenForTick).ToArray();
         }
 
-        private async Task<DeviceRegistration> RegisterDeviceAsync(DeviceIdentifier? deviceIdentifier)
+        private async Task<DatagramSocket> ListenForTick(NetworkAdapter hostname)
         {
-            using (var client = new Ticktack())
+            var socket = new DatagramSocket();
+            socket.MessageReceived += OnMessageReceived;
+
+            await socket.BindServiceNameAsync(Settings.RemoteServiceName, hostname);
+            socket.JoinMulticastGroup(new HostName(Settings.MulticastAddress));
+
+            Log($"Listening on {hostname.NetworkAdapterId}:{Settings.RemoteServiceName}");
+
+            return socket;
+        }
+
+        private static async Task<DeviceRegistration> RegisterDeviceAsync(DeviceIdentifier? deviceIdentifier)
+        {
+            using (var client = new HouseOfTheFutureApiHost())
             {
                 var response = await client.IotRegister
                     .PostWithOperationResponseAsync(new RegisterIotDeviceRequest
@@ -82,19 +107,54 @@ namespace HouseOfTheFuture.IoTHub
                     IsConfigured = response.Body.IsConfigured ?? false
                 };
             }            
+        }                
+
+        private async void OnMessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
+        {
+            Log($"TICK Received FROM {args.RemoteAddress.DisplayName}");
+
+            using (var reader = args.GetDataReader())
+            {
+                var length = reader.UnconsumedBufferLength;
+                var data = reader.ReadString(length);
+
+                if (data.StartsWith(Protocol.TickTack.ReceiveDeviceInfoCommand))
+                {
+                    var remoteAddress = args.RemoteAddress;
+
+                    await SendIdentifierToDevice(remoteAddress);                    
+                }
+            }                       
         }
 
-        private async Task<DatagramSocket> ListenForTick(NetworkAdapter hostname)
+        private async Task SendIdentifierToDevice(HostName remoteAddress)
         {
-            var socket = new DatagramSocket();
-            socket.MessageReceived += Socket_MessageReceived;
+            using (var socket = new DatagramSocket())
+            {
+                await socket.ConnectAsync(remoteAddress, Settings.RemoteServiceName);
 
-            await socket.BindServiceNameAsync(RemoteServiceName, hostname);
-            socket.JoinMulticastGroup(new HostName(MulticastAddress));
+                using (var dataStream = socket.OutputStream.AsStreamForWrite())
+                {                    
+                    var identifier = DeviceRegistration.Current.DeviceIdentifier.ToString();
 
-            Log(string.Format("Listening on {0}:{1}", hostname.NetworkAdapterId, RemoteServiceName));
+                    var data = Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0}:{1}", 
+                        Protocol.TickTack.SendDeviceInfoCommand, identifier));
 
-            return socket;
+                    dataStream.Write(data, 0, data.Length);
+
+                    await dataStream.FlushAsync();
+
+                    Log($"TACK sent to {remoteAddress} - device identifier: {identifier}");
+                }
+            }
+        }
+
+        private void MainPage_OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            foreach (var socket in _sockets)
+            {
+                socket.Result.Dispose();
+            }
         }
 
         private async Task Log(string format)
@@ -110,59 +170,78 @@ namespace HouseOfTheFuture.IoTHub
             }
         }
 
-        private void Socket_MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
+        private async void FakeTickForced(object sender, RoutedEventArgs e)
         {
-            Log(string.Format("TICK Received FROM {0}", args.RemoteAddress.DisplayName));
-        }
+            var clickedButton = (Button) sender;
+            var content = clickedButton.Content.ToString();
 
-        private async Task BroadcastDeviceIdentifier(DeviceIdentifier deviceIdentifier)
-        {
-            foreach (var hostName in _adapters)
+            if (content.Contains(MeterType.Electricity.ToString()))
             {
-                using (var socket = new DatagramSocket())
-                {
-                    await socket.BindServiceNameAsync("", hostName);
-
-                    socket.JoinMulticastGroup(new HostName(MulticastAddress));
-
-                    IOutputStream outputStream = await socket.GetOutputStreamAsync(new HostName(MulticastAddress), RemoteServiceName);
-                    byte[] buffer = Encoding.UTF8.GetBytes(deviceIdentifier.ToString());
-
-                    await outputStream.WriteAsync(buffer.AsBuffer());
-                    await outputStream.FlushAsync();
-
-                    Log(string.Format("TACK Broadcasted to {0}:{1} - Device Identifier: {2}", 
-                        MulticastAddress, RemoteServiceName, deviceIdentifier.ToString()));
-                }
+                await _fakeUsageReporter.ReportFakeUsageForAsync(MeterType.Electricity);
             }
-        }
-
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            BroadcastDeviceIdentifier(new DeviceIdentifier(Guid.NewGuid()));
-        }
-
-        private void MainPage_OnUnloaded(object sender, RoutedEventArgs e)
-        {
-            foreach (var socket in _sockets)
+            else if (content.Contains(MeterType.Water.ToString()))
             {
-                socket.Result.Dispose();
+                await _fakeUsageReporter.ReportFakeUsageForAsync(MeterType.Water);
             }
+            else if (content.Contains(MeterType.Gas.ToString()))
+            {
+                await _fakeUsageReporter.ReportFakeUsageForAsync(MeterType.Gas);
+            }
+
+            Log($"{content} reported.");
         }
     }
 
-    class NetworkInterface
+    public class FakeUsageReporter
     {
-        public static string[] IpAddresses
+        private Dictionary<MeterType, Guid> _fakeSensorIdentifiers;
+
+        private DeviceClient _iotHubClient;
+
+        public FakeUsageReporter()
         {
-            get
-            {
-                return NetworkInformation.GetHostNames()
-                    .Where(x =>x.IPInformation != null 
-                    && (x.IPInformation.NetworkAdapter.IanaInterfaceType == 71 // wifi
-                    || x.IPInformation.NetworkAdapter.IanaInterfaceType == 6))// ethernet
-                    .Select(x => x.DisplayName).ToArray(); 
-            }
+            SetupFakeSensorIdentifiers();            
         }
+
+        public void InitializeIoTHubClient()
+        {            
+            _iotHubClient = DeviceClient.Create(Settings.IoTHubEndpoint,
+                new DeviceAuthenticationWithRegistrySymmetricKey(
+                    DeviceRegistration.Current.DeviceIdentifier.ToString(),
+                    DeviceRegistration.Current.HubDeviceKey), TransportType.Http1);
+        }
+
+        private void SetupFakeSensorIdentifiers()
+        {
+            _fakeSensorIdentifiers = new Dictionary<MeterType, Guid>
+            {
+                { MeterType.Electricity, Guid.NewGuid() },
+                { MeterType.Water, Guid.NewGuid() },
+                { MeterType.Gas, Guid.NewGuid() }
+            };
+        }
+
+        public async Task ReportFakeUsageForAsync(MeterType meterType)
+        {
+            var data = new PostRequest               
+            {
+                HubId = DeviceRegistration.Current.DeviceIdentifier.ToString(),
+                Value = 1,
+                SensorId = _fakeSensorIdentifiers[meterType].ToString(),
+                Timestamp = DateTime.UtcNow
+            };
+
+            var messageString = JsonConvert.SerializeObject(data);
+            var message = new Message(Encoding.ASCII.GetBytes(messageString));
+
+            await _iotHubClient.SendEventAsync(message);
+        }
+    }
+
+    public enum MeterType
+    {
+        Electricity,
+        Water,
+        Gas
     }
 }

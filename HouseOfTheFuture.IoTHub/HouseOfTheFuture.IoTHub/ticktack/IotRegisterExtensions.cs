@@ -5,16 +5,16 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub.Host;
-using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
+using TickTack;
+using TickTack.Models;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
     public static partial class IotRegisterExtensions
     {
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.Host.IIotRegister.
+        /// Reference to the TickTack.IIotRegister.
         /// </param>
         /// <param name='register'>
         /// Required.
@@ -29,7 +29,7 @@ namespace HouseOfTheFuture.IoTHub.Host
         }
         
         /// <param name='operations'>
-        /// Reference to the HouseOfTheFuture.IoTHub.Host.IIotRegister.
+        /// Reference to the TickTack.IIotRegister.
         /// </param>
         /// <param name='register'>
         /// Required.
@@ -39,7 +39,7 @@ namespace HouseOfTheFuture.IoTHub.Host
         /// </param>
         public static async Task<RegisterIotDeviceResponse> PostAsync(this IIotRegister operations, RegisterIotDeviceRequest register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            Microsoft.Rest.HttpOperationResponse<HouseOfTheFuture.IoTHub.Host.Models.RegisterIotDeviceResponse> result = await operations.PostWithOperationResponseAsync(register, cancellationToken).ConfigureAwait(false);
+            Microsoft.Rest.HttpOperationResponse<TickTack.Models.RegisterIotDeviceResponse> result = await operations.PostWithOperationResponseAsync(register, cancellationToken).ConfigureAwait(false);
             return result.Body;
         }
     }

@@ -2,10 +2,12 @@
 // Changes may cause incorrect behavior and will be lost if the code is regenerated.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 
-namespace HouseOfTheFuture.IoTHub.Host.Models
+namespace TickTack.Models
 {
     public partial class RegisterIotDeviceRequest
     {
@@ -20,11 +22,23 @@ namespace HouseOfTheFuture.IoTHub.Host.Models
             set { this._currentDeviceId = value; }
         }
         
+        private IList<string> _sensorIds;
+        
+        /// <summary>
+        /// Optional.
+        /// </summary>
+        public IList<string> SensorIds
+        {
+            get { return this._sensorIds; }
+            set { this._sensorIds = value; }
+        }
+        
         /// <summary>
         /// Initializes a new instance of the RegisterIotDeviceRequest class.
         /// </summary>
         public RegisterIotDeviceRequest()
         {
+            this.SensorIds = new LazyList<string>();
         }
         
         /// <summary>
@@ -42,6 +56,22 @@ namespace HouseOfTheFuture.IoTHub.Host.Models
             if (this.CurrentDeviceId != null)
             {
                 outputObject["currentDeviceId"] = this.CurrentDeviceId;
+            }
+            JArray sensorIdsSequence = null;
+            if (this.SensorIds != null)
+            {
+                if (this.SensorIds is ILazyCollection<string> == false || ((ILazyCollection<string>)this.SensorIds).IsInitialized)
+                {
+                    sensorIdsSequence = new JArray();
+                    outputObject["sensorIds"] = sensorIdsSequence;
+                    foreach (string sensorIdsItem in this.SensorIds)
+                    {
+                        if (sensorIdsItem != null)
+                        {
+                            sensorIdsSequence.Add(sensorIdsItem);
+                        }
+                    }
+                }
             }
             return outputObject;
         }

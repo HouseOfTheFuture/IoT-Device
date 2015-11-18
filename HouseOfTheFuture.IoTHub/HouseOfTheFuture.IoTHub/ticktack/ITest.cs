@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Rest;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
     public partial interface ITest
     {

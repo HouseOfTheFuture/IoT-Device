@@ -17,15 +17,15 @@ using TickTack.Models;
 
 namespace TickTack
 {
-    internal partial class Account : IServiceOperations<HouseOfTheFutureApiHost>, IAccount
+    internal partial class Tick : IServiceOperations<HouseOfTheFutureApiHost>, ITick
     {
         /// <summary>
-        /// Initializes a new instance of the Account class.
+        /// Initializes a new instance of the Tick class.
         /// </summary>
         /// <param name='client'>
         /// Reference to the service client.
         /// </param>
-        internal Account(HouseOfTheFutureApiHost client)
+        internal Tick(HouseOfTheFutureApiHost client)
         {
             this._client = client;
         }
@@ -40,18 +40,18 @@ namespace TickTack
             get { return this._client; }
         }
         
-        /// <param name='register'>
+        /// <param name='request'>
         /// Required.
         /// </param>
         /// <param name='cancellationToken'>
         /// Cancellation token.
         /// </param>
-        public async Task<HttpOperationResponse<string>> PostWithOperationResponseAsync(RegistrationDto register, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async Task<HttpOperationResponse<object>> PostWithOperationResponseAsync(PostRequest request, CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // Validate
-            if (register == null)
+            if (request == null)
             {
-                throw new ArgumentNullException("register");
+                throw new ArgumentNullException("request");
             }
             
             // Tracing
@@ -61,13 +61,13 @@ namespace TickTack
             {
                 invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
-                tracingParameters.Add("register", register);
+                tracingParameters.Add("request", request);
                 ServiceClientTracing.Enter(invocationId, this, "PostAsync", tracingParameters);
             }
             
             // Construct URL
             string url = "";
-            url = url + "/account/register";
+            url = url + "/tick";
             string baseUrl = this.Client.BaseUri.AbsoluteUri;
             // Trim '/' character from the end of baseUrl and beginning of url.
             if (baseUrl[baseUrl.Length - 1] == '/')
@@ -97,7 +97,7 @@ namespace TickTack
             
             // Serialize Request
             string requestContent = null;
-            JToken requestDoc = register.SerializeJson(null);
+            JToken requestDoc = request.SerializeJson(null);
             requestContent = requestDoc.ToString(Newtonsoft.Json.Formatting.Indented);
             httpRequest.Content = new StringContent(requestContent, Encoding.UTF8);
             httpRequest.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -116,7 +116,7 @@ namespace TickTack
             HttpStatusCode statusCode = httpResponse.StatusCode;
             cancellationToken.ThrowIfCancellationRequested();
             string responseContent = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            if (statusCode != HttpStatusCode.OK)
+            if (statusCode != HttpStatusCode.NoContent)
             {
                 HttpOperationException<object> ex = new HttpOperationException<object>();
                 ex.Request = httpRequest;
@@ -130,25 +130,13 @@ namespace TickTack
             }
             
             // Create Result
-            HttpOperationResponse<string> result = new HttpOperationResponse<string>();
+            HttpOperationResponse<object> result = new HttpOperationResponse<object>();
             result.Request = httpRequest;
             result.Response = httpResponse;
             
             // Deserialize Response
-            if (statusCode == HttpStatusCode.OK)
-            {
-                string resultModel = default(string);
-                JToken responseDoc = null;
-                if (string.IsNullOrEmpty(responseContent) == false)
-                {
-                    responseDoc = JToken.Parse(responseContent);
-                }
-                if (responseDoc != null)
-                {
-                    resultModel = responseDoc.ToString(Newtonsoft.Json.Formatting.Indented);
-                }
-                result.Body = resultModel;
-            }
+            object resultModel = default(object);
+            result.Body = resultModel;
             
             if (shouldTrace)
             {

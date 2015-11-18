@@ -4,6 +4,7 @@
     "Microsoft.ApplicationInsights.PersistenceChannel": "1.0.0",
     "Microsoft.ApplicationInsights.WindowsApps": "1.0.0",
     "Microsoft.Azure.AppService": "0.2.2-alpha",
+    "Microsoft.Azure.Devices.Client": "1.0.0-preview-006",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
     "Microsoft.Rest.ClientRuntime": "0.9.6",
     "System.Net.Sockets": "4.0.0"

@@ -1,18 +1,15 @@
-﻿using System;
-using System.IO;
-using Windows.Storage;
+﻿using Windows.Storage;
 using HouseOfTheFuture.IoTHub.Entities;
-using Newtonsoft.Json;
 
 namespace HouseOfTheFuture.IoTHub.Services
 {
-    interface ILocalStorageService
+    public interface ILocalStorageService
     {
         DeviceIdentifier? CheckForExistingDeviceIdentifier();
         void PersistDeviceIdentifier(DeviceIdentifier deviceIdentifier);
     }
 
-    class LocalStorageService
+    public class LocalStorageService
         : ILocalStorageService
     {
         private const string FileName = "deviceconfig.json";
@@ -20,10 +17,12 @@ namespace HouseOfTheFuture.IoTHub.Services
         public DeviceIdentifier? CheckForExistingDeviceIdentifier()
         {
             var id = (string) ApplicationData.Current.LocalSettings.Values["deviceconfig"];
+
             if (!string.IsNullOrEmpty(id))
             {
                 return new DeviceIdentifier(id);
             }
+
             return null;
         }
 

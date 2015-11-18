@@ -3,12 +3,12 @@
 
 using System;
 using System.Linq;
-using HouseOfTheFuture.IoTHub.Host;
 using Microsoft.Rest;
+using TickTack;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
-    public partial interface ITicktack : IDisposable
+    public partial interface IHouseOfTheFutureApiHost : IDisposable
     {
         /// <summary>
         /// The base URI of the service.
@@ -31,12 +31,27 @@ namespace HouseOfTheFuture.IoTHub.Host
             get; 
         }
         
+        IDevices Devices
+        {
+            get; 
+        }
+        
         IIotRegister IotRegister
         {
             get; 
         }
         
+        IServiceLocator ServiceLocator
+        {
+            get; 
+        }
+        
         ITest Test
+        {
+            get; 
+        }
+        
+        ITick Tick
         {
             get; 
         }

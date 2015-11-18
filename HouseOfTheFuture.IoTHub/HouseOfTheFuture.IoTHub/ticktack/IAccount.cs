@@ -5,10 +5,10 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using HouseOfTheFuture.IoTHub.Host.Models;
 using Microsoft.Rest;
+using TickTack.Models;
 
-namespace HouseOfTheFuture.IoTHub.Host
+namespace TickTack
 {
     public partial interface IAccount
     {

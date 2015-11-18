@@ -10,14 +10,11 @@ using TickTack.Models;
 
 namespace TickTack
 {
-    public partial interface IIotRegister
+    public partial interface IServiceLocator
     {
-        /// <param name='register'>
-        /// Required.
-        /// </param>
         /// <param name='cancellationToken'>
         /// Cancellation token.
         /// </param>
-        Task<HttpOperationResponse<RegisterIotDeviceResponse>> PostWithOperationResponseAsync(RegisterIotDeviceRequest register, CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        Task<HttpOperationResponse<ServiceLocations>> GetWithOperationResponseAsync(CancellationToken cancellationToken = default(System.Threading.CancellationToken));
     }
 }
