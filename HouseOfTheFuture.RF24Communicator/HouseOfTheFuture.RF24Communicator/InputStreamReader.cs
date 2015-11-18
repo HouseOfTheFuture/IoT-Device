@@ -41,12 +41,8 @@ namespace HouseOfTheFuture.RF24Communicator
                     var bytes = new byte[readBytes];
                     _reader.ReadBytes(bytes);
                     var message = Encoding.UTF8.GetString(bytes);
-                    var messages = message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var item in messages)
-                    {
-                        if (OnLineRead != null)
-                            OnLineRead(this, item);
-                    }
+                    if (OnLineRead != null)
+                        OnLineRead(this, message);
                 }
             }
             catch (Exception e)

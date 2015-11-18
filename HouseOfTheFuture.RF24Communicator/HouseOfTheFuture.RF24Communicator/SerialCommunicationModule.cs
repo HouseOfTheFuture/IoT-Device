@@ -88,7 +88,7 @@ namespace HouseOfTheFuture.RF24Communicator
                 // Create cancellation token object to close I/O operations when closing the device
                 ReadCancellationTokenSource = new CancellationTokenSource();
 
-                _streamReader = new InputStreamReader(serialPort.InputStream, 128);
+                _streamReader = new InputStreamReader(serialPort.InputStream, 31);
                 _streamReader.OnLineRead += OnLineRead;
                 _streamReader.StartReading();
             }
